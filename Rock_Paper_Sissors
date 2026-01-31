@@ -1,0 +1,179 @@
+import tkinter as tk
+import random
+import time
+
+# ------------------ GLOBALS ------------------
+user_score = 0
+computer_score = 0
+
+BG = "#0f172a"       # Dark navy
+FG = "#e5e7eb"       # Light text
+ACCENT = "#22d3ee"   # Neon cyan
+WIN = "#22c55e"      # Green
+LOSE = "#ef4444"     # Red
+TIE = "#facc15"      # Yellow
+
+# ------------------ RESULT ANIMATION ------------------
+def animate_text(label, text, color):
+    label.config(text="", fg=color)
+    for i in range(len(text)):
+        label.config(text=text[:i+1])
+        root.update()
+        time.sleep(0.03)
+
+# ------------------ GAME LOGIC ------------------
+def play(user_choice):
+    global user_score, computer_score
+
+    choices = ["Rock", "Paper", "Scissors"]
+    computer_choice = random.choice(choices)
+
+    user_label.config(text=f"🧑 You: {user_choice}")
+    computer_label.config(text=f"🤖 Computer: {computer_choice}")
+
+    if user_choice == computer_choice:
+        animate_text(result_label, "🤝 It's a Tie!", TIE)
+        status_label.config(text="No points this round.", fg=TIE)
+
+    elif (
+        (user_choice == "Rock" and computer_choice == "Scissors") or
+        (user_choice == "Scissors" and computer_choice == "Paper") or
+        (user_choice == "Paper" and computer_choice == "Rock")
+    ):
+        user_score += 1
+        animate_text(result_label, "🎉 You Win!", WIN)
+        status_label.config(text="Excellent move! You scored 🎯", fg=WIN)
+
+    else:
+        computer_score += 1
+        animate_text(result_label, "😞 You Lose!", LOSE)
+        status_label.config(text="Computer scores this round 💻", fg=LOSE)
+
+    score_label.config(
+        text=f"Score → You: {user_score}   |   Computer: {computer_score}"
+    )
+
+# ------------------ RESET ------------------
+def reset_game():
+    global user_score, computer_score
+    user_score = 0
+    computer_score = 0
+    user_label.config(text="")
+    computer_label.config(text="")
+    result_label.config(text="Scores Reset 🔄", fg=ACCENT)
+    score_label.config(text="Score → You: 0   |   Computer: 0")
+    status_label.config(text="Make your next move!", fg=ACCENT)
+
+# ------------------ BUTTON HOVER ------------------
+def on_enter(e):
+    e.widget.config(bg="#334155")
+
+def on_leave(e, color):
+    e.widget.config(bg=color)
+
+# ------------------ GUI ------------------
+root = tk.Tk()
+root.title("Rock Paper Scissors")
+root.geometry("520x620")
+root.config(bg=BG)
+
+# ------------------ TITLE ------------------
+title = tk.Label(
+    root,
+    text="Rock Paper Scissors",
+    font=("Segoe UI", 24, "bold"),
+    bg=BG,
+    fg=ACCENT
+)
+title.pack(pady=20)
+
+subtitle = tk.Label(
+    root,
+    text="Choose your move and challenge the computer!",
+    font=("Segoe UI", 13),
+    bg=BG,
+    fg=FG
+)
+subtitle.pack()
+
+# ------------------ BUTTONS ------------------
+btn_frame = tk.Frame(root, bg=BG)
+btn_frame.pack(pady=30)
+
+def create_button(text, color, choice):
+    btn = tk.Button(
+        btn_frame,
+        text=text,
+        font=("Segoe UI", 14, "bold"),
+        width=14,
+        bg=color,
+        fg="white",
+        bd=0,
+        activebackground="#334155",
+        command=lambda: play(choice)
+    )
+    btn.bind("<Enter>", on_enter)
+    btn.bind("<Leave>", lambda e: on_leave(e, color))
+    return btn
+
+create_button("🪨  Rock", "#ef4444", "Rock").grid(row=0, column=0, padx=10, pady=10)
+create_button("📄  Paper", "#3b82f6", "Paper").grid(row=0, column=1, padx=10, pady=10)
+create_button("✂️  Scissors", "#22c55e", "Scissors").grid(row=1, column=0, columnspan=2, pady=10)
+
+# ------------------ DISPLAY ------------------
+user_label = tk.Label(root, text="", font=("Segoe UI", 13), bg=BG, fg=FG)
+user_label.pack()
+
+computer_label = tk.Label(root, text="", font=("Segoe UI", 13), bg=BG, fg=FG)
+computer_label.pack()
+
+result_label = tk.Label(root, text="", font=("Segoe UI", 20, "bold"), bg=BG)
+result_label.pack(pady=15)
+
+score_label = tk.Label(
+    root,
+    text="Score → You: 0   |   Computer: 0",
+    font=("Segoe UI", 14),
+    bg=BG,
+    fg=ACCENT
+)
+score_label.pack(pady=10)
+
+status_label = tk.Label(
+    root,
+    text="Make your first move!",
+    font=("Segoe UI", 12, "italic"),
+    bg=BG,
+    fg=ACCENT
+)
+status_label.pack(pady=5)
+
+# ------------------ CONTROLS ------------------
+control_frame = tk.Frame(root, bg=BG)
+control_frame.pack(pady=25)
+
+reset_btn = tk.Button(
+    control_frame,
+    text="🔄 Reset",
+    font=("Segoe UI", 12, "bold"),
+    width=14,
+    bg="#f59e0b",
+    fg="black",
+    bd=0,
+    command=reset_game
+)
+reset_btn.grid(row=0, column=0, padx=10)
+
+exit_btn = tk.Button(
+    control_frame,
+    text="❌ Exit",
+    font=("Segoe UI", 12, "bold"),
+    width=14,
+    bg="#991b1b",
+    fg="white",
+    bd=0,
+    command=root.destroy
+)
+exit_btn.grid(row=0, column=1, padx=10)
+
+root.mainloop()
