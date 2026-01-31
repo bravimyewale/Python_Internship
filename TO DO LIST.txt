@@ -1,0 +1,184 @@
+TO DO LIST
+
+
+import tkinter as tk
+from tkinter import ttk
+
+# ---------------- Main Window ----------------
+root = tk.Tk()
+root.title("To-Do List")
+root.geometry("600x820")   # 🔥 Increased height
+root.minsize(600, 820)
+root.configure(bg="#0b1020")
+
+tasks = []
+completed = set()
+
+# ---------------- Functions ----------------
+def refresh_listbox():
+    listbox.delete(0, tk.END)
+    for i, task in enumerate(tasks, start=1):
+        prefix = "✔ " if i-1 in completed else ""
+        listbox.insert(tk.END, f"{i}. {prefix}{task}")
+        if i-1 in completed:
+            listbox.itemconfig(i-1, fg="#22c55e")
+    update_progress()
+
+def add_task():
+    task = entry_task.get().strip()
+    if task:
+        tasks.append(task)
+        entry_task.delete(0, tk.END)
+        refresh_listbox()
+
+def update_task():
+    try:
+        i = listbox.curselection()[0]
+        tasks[i] = entry_task.get()
+        completed.discard(i)
+        entry_task.delete(0, tk.END)
+        refresh_listbox()
+    except:
+        pass
+
+def delete_task():
+    try:
+        i = listbox.curselection()[0]
+        tasks.pop(i)
+        completed.discard(i)
+        refresh_listbox()
+    except:
+        pass
+
+def mark_done():
+    try:
+        i = listbox.curselection()[0]
+        completed.add(i)
+        refresh_listbox()
+    except:
+        pass
+
+def clear_all():
+    tasks.clear()
+    completed.clear()
+    refresh_listbox()
+
+def update_progress():
+    if not tasks:
+        progress["value"] = 0
+    else:
+        progress["value"] = (len(completed) / len(tasks)) * 100
+
+# ---------------- Progress Style ----------------
+style = ttk.Style()
+style.theme_use("default")
+style.configure(
+    "Dark.Horizontal.TProgressbar",
+    troughcolor="#1e293b",
+    background="#22c55e",
+    thickness=18
+)
+
+# ---------------- MAIN CONTAINER ----------------
+main = tk.Frame(root, bg="#0b1020")
+main.pack(fill="both", expand=True)
+
+# ---------------- Title ----------------
+tk.Label(
+    main,
+    text="📝  TO-DO LIST",
+    font=("Segoe UI", 28, "bold"),
+    bg="#0b1020",
+    fg="white"
+).pack(pady=20)
+
+# ---------------- Entry (White Border) ----------------
+border = tk.Frame(main, bg="white", padx=2, pady=2)
+border.pack(pady=10)
+
+entry_task = tk.Entry(
+    border,
+    font=("Segoe UI", 15),
+    width=36,
+    bg="#020617",
+    fg="white",
+    insertbackground="white",
+    relief="flat"
+)
+entry_task.pack(ipady=8)
+
+# ---------------- Add Button ----------------
+tk.Button(
+    main,
+    text="➕ ADD TASK",
+    font=("Segoe UI", 13, "bold"),
+    bg="#22c55e",
+    fg="black",
+    width=22,
+    relief="flat",
+    command=add_task
+).pack(pady=10)
+
+# ---------------- Progress ----------------
+tk.Label(
+    main,
+    text="📊 Task Progress",
+    bg="#0b1020",
+    fg="white",
+    font=("Segoe UI", 12, "bold")
+).pack(pady=(10, 5))
+
+progress = ttk.Progressbar(
+    main,
+    style="Dark.Horizontal.TProgressbar",
+    length=420,
+    maximum=100
+)
+progress.pack(pady=10)
+
+# ---------------- Task List (LIMITED HEIGHT) ----------------
+listbox = tk.Listbox(
+    main,
+    font=("Segoe UI", 14),
+    width=45,
+    height=8,   # 🔥 Reduced height so bottom stays visible
+    bg="#020617",
+    fg="white",
+    selectbackground="#38bdf8",
+    relief="flat"
+)
+listbox.pack(pady=15)
+
+# ---------------- Buttons ----------------
+btn_frame = tk.Frame(main, bg="#0b1020")
+btn_frame.pack(pady=10)
+
+tk.Button(btn_frame, text="✏ UPDATE", bg="#3b82f6", fg="white",
+          font=("Segoe UI", 11, "bold"), width=14,
+          relief="flat", command=update_task).grid(row=0, column=0, padx=10, pady=8)
+
+tk.Button(btn_frame, text="🗑 DELETE", bg="#ef4444", fg="white",
+          font=("Segoe UI", 11, "bold"), width=14,
+          relief="flat", command=delete_task).grid(row=0, column=1, padx=10, pady=8)
+
+tk.Button(btn_frame, text="✔ DONE", bg="#a855f7", fg="white",
+          font=("Segoe UI", 11, "bold"), width=14,
+          relief="flat", command=mark_done).grid(row=1, column=0, padx=10, pady=8)
+
+tk.Button(btn_frame, text="🧹 CLEAR ALL", bg="#f59e0b", fg="black",
+          font=("Segoe UI", 11, "bold"), width=14,
+          relief="flat", command=clear_all).grid(row=1, column=1, padx=10, pady=8)
+
+# ---------------- Status Bar (ALWAYS VISIBLE) ----------------
+status = tk.Label(
+    root,
+    text="✨ Dark To-Do List with Progress Tracker",
+    font=("Segoe UI", 11),
+    bg="#020617",
+    fg="#94a3b8",
+    anchor="w",
+    padx=15
+)
+status.pack(side="bottom", fill="x")
+
+root.mainloop()
